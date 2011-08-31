@@ -1,0 +1,9 @@
+*.beam
+*.o
+*.so
+*.a
+.eunit
+erl_crash.dump
+deps
+ebin
+doc
