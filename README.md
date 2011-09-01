@@ -11,11 +11,11 @@
 
 A client for [loggr](http://loggr.net).
 
-### Features
+### Usage
 
-Prerequisite:
+Pre-requisite:
 
-- The ibrowse application must be started.
+- The ibrowse application must be started prior to using *loggErL*.
 
 
 Posting a simple event:
