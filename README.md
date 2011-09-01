@@ -13,13 +13,24 @@ A client for [loggr](http://loggr.net).
 
 ### Features
 
-*Nothing done yet, this is a work in progress.*
+Prerequisite:
+
+- The ibrowse application must be started.
+
+
+Posting a simple event:
+
+    loggr_event:post(ApiKey, LogKey, "a new event").
+
+Posting an event with [optional fields](http://docs.loggr.net/events):
+
+    loggr_event:post(ApiKey, LogKey, "an event with data", [{data, "some\ndata"}]).
 
 
 ### Pending
 
-- Logging API
-- Log4Erl Integration
+- Support setting ApiKey and LogKey in *loggErL*'s application environment,
+- Log4Erl integration,
 - Client for the Loggr Web Api.
 
 
@@ -29,9 +40,13 @@ A client for [loggr](http://loggr.net).
 
 Simply run:
 
-    rebar get-deps compile eunit
+    rebar get-deps compile
+    
+To run the test suite:
 
-Optionally, to generate the *loggErL* documentation, run:
+    rebar skip_deps=true eunit
+
+To generate the *loggErL* documentation, run:
 
     rebar skip_deps=true doc
 

@@ -6,4 +6,12 @@
 %%% Copyright (c) 2011 David Dossot
 %%%
 
--record(loggr_event_fields, {text="", link="", source="", user="", tags="", value="", data="", geo=""}).
+%                            {name, min, max}
+-define(LOGGR_EVENT_FIELDS, [{text,   1, 500},
+                             {link,   0, 200},
+                             {source, 0, 200},
+                             {user,   0, 200},
+                             {tags,   0, 200},
+                             {value,  0, 30},
+                             {data,   0, 5120},
+                             {geo,    0, 30}]).
