@@ -25,11 +25,19 @@ Posting a simple event:
 Posting an event with [optional fields](http://docs.loggr.net/events):
 
     loggr_event:post(ApiKey, LogKey, "an event with data", [{data, "some\ndata"}]).
+    
+It's also possible to configure globally the ApiKey and LogKey in the application configuration:
 
+    {env,[{loggr_api_key, "..."}, {loggr_log_key,"..."}]}
+
+With this in place, you can do:
+
+    loggr_event:post("a new event").
+    loggr_event:post("an event with data", [{data, "some\ndata"}]).
+    
 
 ### Pending
 
-- Support setting ApiKey and LogKey in *loggErL*'s application environment,
 - Log4Erl integration,
 - Client for the Loggr Web Api.
 

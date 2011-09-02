@@ -12,21 +12,35 @@
 -import(error_m,[return/1,fail/1]).
 -compile({parse_transform, do}).
 
--export([post/3, post/4]).
+-export([post/1, post/2, post/3, post/4]).
 
-% TODO support post/1 post/2 getting LogKey/ApiKey from app config
 % TODO support binary fields?
 % TODO allow setting current stack as text
 
-%% @doc Post an event to the loggr server.
-%% @spec post(ApiKey::list(), LogKey::list(), Text::string()) -> ok | {error, Error::term()}
+%% @doc Post a text-only event to the loggr server, using the loggr_api_key and loggr_log_key application configuration parameter.
+%% @spec post(Text::string()) -> ok | {error, Error::term()}
+post(Text) when is_list(Text) ->
+  
+  post(Text, []).
+
+%% @doc Post an event to the loggr server, using the loggr_api_key and loggr_log_key application configuration parameter.
+%% @spec post(Text::string(), OptionalFields::proplist()) -> ok | {error, Error::term()}
+post(Text, OptionalFields) when is_list(Text), is_list(OptionalFields) ->
+  
+  do([error_m ||
+      ApiKey <- get_application_configuration_parameter(loggr_api_key),
+      LogKey <- get_application_configuration_parameter(loggr_log_key),
+      post(ApiKey, LogKey, Text, OptionalFields)]).
+
+%% @doc Post a text-only event to the loggr server.
+%% @spec post(ApiKey::string(), LogKey::string(), Text::string()) -> ok | {error, Error::term()}
 post(ApiKey, LogKey, Text)
   when is_list(ApiKey), is_list(LogKey), is_list(Text) ->
   
   post(ApiKey, LogKey, Text, []).
 
 %% @doc Post an event to the loggr server.
-%% @spec post(ApiKey::list(), LogKey::list(), Text::string(), OptionalFields::proplist()) -> ok | {error, Error::term()}
+%% @spec post(ApiKey::string(), LogKey::string(), Text::string(), OptionalFields::proplist()) -> ok | {error, Error::term()}
 post(ApiKey, LogKey, Text, OptionalFields)
   when is_list(ApiKey), is_list(LogKey), is_list(Text), is_list(OptionalFields) ->
   
@@ -38,6 +52,12 @@ post(ApiKey, LogKey, Text, OptionalFields)
       perform_post(ApiKey, LogKey, Fields)]).
       
 %% Private functions
+get_application_configuration_parameter(Name) when is_atom(Name) ->
+  case application:get_env(loggerl, Name) of
+    {ok, Value} -> return(Value);
+    _ -> fail({missing_application_configuration_parameter, Name})
+  end.
+
 ensure_fields_format([]) ->
   return(ok);
 ensure_fields_format([Field|Rest]) ->
