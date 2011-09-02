@@ -15,7 +15,7 @@ A client for [loggr](http://loggr.net).
 
 Pre-requisite:
 
-- The ibrowse application must be started prior to using *loggErL*.
+- The ibrowse application must be started prior to using **loggErL**.
 
 
 Posting a simple event:
@@ -44,9 +44,9 @@ With this in place, you can do:
 
 ### Building
 
-*loggErL* relies on [rebar](http://bitbucket.org/basho/rebar/wiki/Home) for its build and dependency management and targets Erlang/OTP R13B04 or above.
+**loggErL** relies on [rebar](http://bitbucket.org/basho/rebar/wiki/Home) for its build and dependency management and targets Erlang/OTP R13B04 or above.
 
-Simply run:
+Fetch the dependencies and compile with:
 
     rebar get-deps compile
     
@@ -54,7 +54,7 @@ To run the test suite:
 
     rebar skip_deps=true eunit
 
-To generate the *loggErL* documentation, run:
+To generate the **loggErL** documentation:
 
     rebar skip_deps=true doc
 
