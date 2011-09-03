@@ -11,6 +11,24 @@
 
 A client for [loggr](http://loggr.net).
 
+
+## Building
+
+**loggErL** relies on [rebar](http://bitbucket.org/basho/rebar/wiki/Home) for its build and dependency management and targets Erlang/OTP R13B04 or above.
+
+Fetch the dependencies and compile with:
+
+    rebar get-deps compile
+    
+To run the test suite:
+
+    rebar skip_deps=true eunit
+
+To generate the **loggErL** documentation:
+
+    rebar skip_deps=true doc
+
+
 ## Usage
 
 Pre-requisite:
@@ -40,26 +58,25 @@ With this in place, you can do:
 
 This appender allows broadcasting [Log4Erl](https://github.com/ahmednawras/log4erl) events to loggr.
 
-The Log4Erl log level (debug, info...) is propagated as a loggr tag, allowing server side filtering.
+Its configuration is very basic:
 
-**TBD document**
+    loggr4erl_appender loggr {
+      level = info,
+      api_key = "...",
+      log_key = "..."
+    }
 
+With this in place, you can broadcast events to loggr from Log4Erl:
 
-## Building
+    log4erl:warn("something is not right").
+  
+> The Log4Erl log level (debug, info...) is propagated as a loggr tag.
 
-**loggErL** relies on [rebar](http://bitbucket.org/basho/rebar/wiki/Home) for its build and dependency management and targets Erlang/OTP R13B04 or above.
+Any loggr [optional field](http://docs.loggr.net/events) can be passed too, as shown in the following examples:
 
-Fetch the dependencies and compile with:
-
-    rebar get-deps compile
+    log4erl:info("user ~p just logged in~i", [{user, "u123"}, {geo, "40.1203,-76.2944"}]).
     
-To run the test suite:
-
-    rebar skip_deps=true eunit
-
-To generate the **loggErL** documentation:
-
-    rebar skip_deps=true doc
+    log4erl:warn("something went really bad: ~p", [{data, erlang:get_stacktrace()}]).
 
 
 ## Pending Features

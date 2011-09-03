@@ -26,24 +26,23 @@ init({conf, Conf}) when is_list(Conf) ->
 
 handle_event({change_level, Level}, State) ->
   State2 = State#configuration{level = Level},
-  ?LOG2("changed level to ~p~n",[Level]),
+  error_logger:info_msg("changed level to ~p~n",[Level]),
   {ok, State2};
 
 handle_event({log, LLog}, State) ->
-  ?LOG2("handle_event:log = ~p~n",[LLog]),
   do_log(LLog, State),
   {ok, State}.
 
 handle_call({change_format, _Format}, State) ->
-  ?LOG2("ignoring format change: ~p~n",[State]),
+  error_logger:info_msg("ignoring format change: ~p~n", [State]),
   {ok, ok, State};
 
 handle_call(_Request, State) ->
   Reply = ok,
   {ok, Reply, State}.
 
-handle_info(_Info, State) ->
-  ?LOG2("~w received unknown message: ~p~n", [?MODULE, _Info]),
+handle_info(Info, State) ->
+  error_logger:warning_msg("received unknown message: ~p~n", [Info]),
   {ok, State}.
 
 terminate(_Reason, _State) ->
@@ -57,23 +56,52 @@ do_log(Log, #configuration{level=AppenderLevel, api_key=ApiKey, log_key=LogKey})
   ShouldLog = log4erl_utils:to_log(Log#log.level, AppenderLevel),
   case ShouldLog of
     true ->
-      loggr_event:post(ApiKey,
-                       LogKey,
-                       format_loggr_field(Log#log.msg, text),
-                       [{tags, format_loggr_field(Log#log.level, tags)}]);
+      post_loggr_event(ApiKey, LogKey, get_text(Log), get_fields(Log));
     false ->
       ok
   end.
 
+post_loggr_event(ApiKey, LogKey, Text, OptionalFields) ->
+  FormattedText = format_loggr_field(Text, text),
+  FormattedOptionalFields = [{Name, format_loggr_field(Value, Name)} || {Name, Value} <- OptionalFields],
+  
+  case catch loggr_event:post(ApiKey, LogKey, FormattedText, FormattedOptionalFields) of
+    ok ->
+      ok;
+    Error = {error, Cause} ->
+      error_logger:error_msg("failed to post event (~1024p,~1024p) to loggr: ~1024p~n",
+                             [FormattedText, FormattedOptionalFields, Cause]),
+      Error;
+    OtherError ->
+      error_logger:error_msg("failed to post event (~1024p,~1024p) to loggr: ~1024p~n",
+                             [FormattedText, FormattedOptionalFields, OtherError])
+  end.
+
+get_text(#log{msg=Msg, data=Data}) when is_list(Data) ->
+  DataValues = [Value || {_, Value} <- Data],
+  lists:flatten(io_lib:format(Msg, DataValues));
+get_text(#log{msg=Msg, data=undefined}) ->
+  Msg.
+  
+get_fields(Log=#log{data=undefined}) ->
+  get_fields(Log#log{data=[]});
+get_fields(#log{level=Level, data=Data}) ->
+  [{tags, Level}|Data].
+  
 format_loggr_field(Term, FieldName) when is_atom(FieldName) ->
   {_, _, MaxSize} = lists:keyfind(FieldName, 1, ?LOGGR_EVENT_FIELDS),
   to_string(Term, MaxSize).
-  
+
 to_string(Term, MaxSize) when is_list(Term), is_integer(MaxSize) ->
-  string:sub_string(Term, 1, MaxSize);
+  case catch lists:flatten(io_lib:format("~s", [Term])) of
+    String when is_list(String) ->
+      string:sub_string(String, 1, MaxSize);
+    _ ->
+      to_string(io_lib:format("~1024p",[Term]), MaxSize)
+  end;
 to_string(Term, MaxSize) when is_atom(Term), is_integer(MaxSize) ->
   to_string(atom_to_list(Term), MaxSize);
 to_string(Term, MaxSize) when is_binary(Term), is_integer(MaxSize) ->
   to_string(binary_to_list(Term), MaxSize);
 to_string(Term, MaxSize) when is_integer(MaxSize) ->
-  to_string(io:format("~1024p",[Term]), MaxSize).
+  to_string(io_lib:format("~1024p",[Term]), MaxSize).
