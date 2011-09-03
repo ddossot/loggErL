@@ -11,12 +11,13 @@
 
 A client for [loggr](http://loggr.net).
 
-### Usage
+## Usage
 
 Pre-requisite:
 
 - The ibrowse application must be started prior to using **loggErL**.
 
+### Direct API calls
 
 Posting a simple event:
 
@@ -34,15 +35,17 @@ With this in place, you can do:
 
     loggr_event:post("a new event").
     loggr_event:post("an event with data", [{data, "some\ndata"}]).
-    
 
-### Pending
+### Log4Erl Appender
 
-- Log4Erl integration,
-- Client for the Loggr Web Api.
+This appender allows broadcasting [Log4Erl](https://github.com/ahmednawras/log4erl) events to loggr.
+
+The Log4Erl log level (debug, info...) is propagated as a loggr tag, allowing server side filtering.
+
+**TBD document**
 
 
-### Building
+## Building
 
 **loggErL** relies on [rebar](http://bitbucket.org/basho/rebar/wiki/Home) for its build and dependency management and targets Erlang/OTP R13B04 or above.
 
@@ -58,6 +61,10 @@ To generate the **loggErL** documentation:
 
     rebar skip_deps=true doc
 
+
+## Pending Features
+
+- Client for the Loggr Web Api.
 
 
 #### Copyright 2011 - David Dossot - MIT License
